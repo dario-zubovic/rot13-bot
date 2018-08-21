@@ -7,7 +7,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-// invite link: https://discordapp.com/oauth2/authorize?client_id=478616184527388672&scope=bot&permissions=11264
+// invite link: https://discordapp.com/oauth2/authorize?client_id={CLIENT-ID-HERE}&scope=bot&permissions=11264
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID { // ignore messages by bot itself
@@ -23,7 +23,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		str := fmt.Sprintf("%v: %v", m.Author.Mention(), doRot13(m.Message.Content[7:]))
 
-		_, err = s.ChannelMessageSend(m.ChannelID, str)
+		msg, err := s.ChannelMessageSend(m.ChannelID, str)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		err = s.MessageReactionAdd(msg.ChannelID, msg.ID, spoilEmojiID)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -32,7 +38,11 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
-	if m.Emoji.Name != "spoilme" { // only react to spoiler emoji
+	if m.UserID == s.State.User.ID { // only react to reaction emojis posted by other users
+		return
+	}
+
+	if m.Emoji.Name != spoilEmojiID { // only react to spoiler emoji
 		return
 	}
 

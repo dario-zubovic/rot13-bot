@@ -9,9 +9,13 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
+const (
+	spoilEmojiID = "🍉"
+)
+
 func main() {
-	if len(os.Args) == 1 {
-		fmt.Println("Please specify bot token in first argument.")
+	if len(os.Args) != 2 {
+		fmt.Println("Please specify bot token in the first argument.")
 		return
 	}
 
