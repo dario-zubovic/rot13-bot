@@ -63,7 +63,14 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	}
 
 	i := strings.Index(msg.Content, ":")
-	str := fmt.Sprintf("%v: %v", msg.Content[1:i], doRot13(msg.Content[i+2:]))
+
+	user, err := s.User(msg.Content[2 : i-1])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	str := fmt.Sprintf("%v: %v", user.Username, doRot13(msg.Content[i+2:]))
 
 	_, err = s.ChannelMessageSend(ch.ID, str)
 	if err != nil {
