@@ -52,9 +52,9 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 		return
 	}
 
-	if msg.Author.ID != s.State.User.ID { // we're only interested in messages sent by the bot
-		return
-	}
+	// if msg.Author.ID != s.State.User.ID { // we're only interested in messages sent by the bot
+	// 	return
+	// }
 
 	ch, err := s.UserChannelCreate(m.UserID)
 	if err != nil {
@@ -62,15 +62,25 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 		return
 	}
 
-	i := strings.Index(msg.Content, ":")
+	var message, username string
 
-	user, err := s.User(msg.Content[2 : i-1])
-	if err != nil {
-		fmt.Println(err)
-		return
+	if msg.Author.ID == s.State.User.ID { // message was posted by bot
+		i := strings.Index(msg.Content, ":")
+
+		user, err := s.User(msg.Content[2 : i-1])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		username = user.Username
+		message = msg.Content[i+2:]
+	} else {
+		username = msg.Author.Username
+		message = msg.Content
 	}
 
-	str := fmt.Sprintf("%v: %v", user.Username, doRot13(msg.Content[i+2:]))
+	str := fmt.Sprintf("%v: %v", username, doRot13(message))
 
 	_, err = s.ChannelMessageSend(ch.ID, str)
 	if err != nil {
