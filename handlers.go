@@ -15,6 +15,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	var str string
+	react := false
 
 	if strings.HasPrefix(strings.ToLower(m.Message.Content), "!rot13 ") {
 		err := s.ChannelMessageDelete(m.ChannelID, m.ID)
@@ -22,6 +23,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			fmt.Println(err)
 		} else {
 			str = fmt.Sprintf("%v: %v", m.Author.Mention(), doRot13(m.Message.Content[7:]))
+			react = true
 		}
 	}
 
@@ -44,10 +46,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 			return
 		}
 
-		err = s.MessageReactionAdd(msg.ChannelID, msg.ID, spoilEmojiID)
-		if err != nil {
-			fmt.Println(err)
-			return
+		if react {
+			err = s.MessageReactionAdd(msg.ChannelID, msg.ID, spoilEmojiID)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
 		}
 	}
 }
