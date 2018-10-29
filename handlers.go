@@ -14,15 +14,30 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if strings.HasPrefix(m.Message.Content, "!rot13 ") {
+	var str string
+
+	if strings.HasPrefix(strings.ToLower(m.Message.Content), "!rot13 ") {
 		err := s.ChannelMessageDelete(m.ChannelID, m.ID)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			str = fmt.Sprintf("%v: %v", m.Author.Mention(), doRot13(m.Message.Content[7:]))
+		}
+	}
+
+	if len(str) == 0 {
+		dm, err := comesFromDM(s, m)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 
-		str := fmt.Sprintf("%v: %v", m.Author.Mention(), doRot13(m.Message.Content[7:]))
+		if dm {
+			str = doRot13(m.Message.Content)
+		}
+	}
 
+	if len(str) > 0 {
 		msg, err := s.ChannelMessageSend(m.ChannelID, str)
 		if err != nil {
 			fmt.Println(err)
@@ -87,4 +102,15 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 		fmt.Println(err)
 		return
 	}
+}
+
+func comesFromDM(s *discordgo.Session, m *discordgo.MessageCreate) (bool, error) {
+	channel, err := s.State.Channel(m.ChannelID)
+	if err != nil {
+		if channel, err = s.Channel(m.ChannelID); err != nil {
+			return false, err
+		}
+	}
+
+	return channel.Type == discordgo.ChannelTypeDM, nil
 }
