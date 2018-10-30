@@ -83,7 +83,7 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 
 	var message, username string
 
-	if msg.Author.ID == s.State.User.ID { // message was posted by bot
+	if msg.Author.ID == s.State.User.ID && ch.Type != discordgo.ChannelTypeDM { // message was posted by bot
 		i := strings.Index(msg.Content, ":")
 
 		user, err := s.User(msg.Content[2 : i-1])
