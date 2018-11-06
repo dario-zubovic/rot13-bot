@@ -22,7 +22,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			str = fmt.Sprintf("%v: %v", m.Author.Mention(), doRot13(m.Message.Content[7:]))
+			msgWithoutCmd := m.Message.Content[7:]
+			if strings.ToLower(msgWithoutCmd) == "test" {
+				str = "Yes, I am working fine."
+			} else {
+				str = fmt.Sprintf("%v: %v", m.Author.Mention(), doRot13(msgWithoutCmd))
+			}
 			react = true
 		}
 	}
