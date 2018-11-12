@@ -91,10 +91,12 @@ func messageReactionAdd(s *discordgo.Session, m *discordgo.MessageReactionAdd) {
 	if msg.Author.ID == s.State.User.ID && msg.Content != "Yes, I am working fine." { // message was posted by bot
 		i := strings.Index(msg.Content, ":")
 
-		user, err := s.User(msg.Content[2 : i-1])
-		if err == nil {
-			username = user.Username
-			message = msg.Content[i+2:]
+		if i > 2 && i < len(msg.Content) {
+			user, err := s.User(msg.Content[2 : i-1])
+			if err == nil {
+				username = user.Username
+				message = msg.Content[i+2:]
+			}
 		}
 	}
 
